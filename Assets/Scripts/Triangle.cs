@@ -19,10 +19,14 @@ public class Triangle
 
         m_center = (points[0] + points[1] + points[2]) / 3.0f;
 
-        m_normal = Vector3.Cross(points[2] - points[0], points[1] - points[0]);
-        m_normal.Normalize();
+        m_normal = -Vector3.Cross(points[2] - points[0], points[1] - points[0]); //minus sign because unity uses (x,z,y) instead of (x,y,z)
 
         m_valid = true;
+    }
+
+    private Vector3 CrossProduct(Vector3 u, Vector3 v)
+    {
+        return new Vector3(u.y * v.z - v.y * u.z, u.z * v.x - v.z * u.x, u.x * v.y - v.x * u.y);
     }
 
     /**
@@ -41,16 +45,11 @@ public class Triangle
         return m_points[vertexIndex == 2 ? 0 : vertexIndex + 1];
     }
 
-    public bool IsFlat()
-    {
-        Vector3 u = m_points[1] - m_points[0];
-        Vector3 v = m_points[2] - m_points[0];
-
-        return Vector3.Cross(u, v) == Vector3.zero;
-    }
-
     public struct IntersectionPoint
     {
+        //public int X;
+        //public int Y;
+        //public int Z;
         public Vector3 m_point;
         public int m_edgeIndex; //the edge index i.e the index of the first point of this edge when wheeling the triangle in cw order
         public bool m_isTriangleVertex; //is this intersection point one of the three triangle vertices
@@ -58,13 +57,16 @@ public class Triangle
         public IntersectionPoint(Vector3 point, int edgeIndex, bool isTriangleVertex)
         {
             m_point = point;
+            //X = (int)(point.x * 1E07);
+            //Y = (int)(point.y * 1E07);
+            //Z = (int)(point.z * 1E07);
             m_edgeIndex = edgeIndex;
             m_isTriangleVertex = isTriangleVertex;
         }
 
-        public bool ShareSamePosition(IntersectionPoint other)
+        public bool ShareSamePosition(IntersectionPoint other, float sqrEpsilon)
         {
-            return (m_point - other.m_point).sqrMagnitude < 1E-010;
+            return (m_point - other.m_point).sqrMagnitude < sqrEpsilon;
         }
     }
 
